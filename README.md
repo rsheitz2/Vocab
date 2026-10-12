@@ -38,8 +38,9 @@ uv sync
 Then use the included script:
 
 ```bash
-./vocab.sh          # show help
-./vocab.sh start    # play today's game
+./vocab.sh             # show help
+./vocab.sh start       # play today's game
+./vocab.sh history     # browse past words
 ```
 
 ## Run tests
@@ -49,15 +50,34 @@ uv run pytest tests/ -v -m "not network"   # offline unit tests
 uv run pytest tests/ -v -m network         # live M-W RSS fetch test
 ```
 
+## Word history
+
+`./vocab.sh history` opens a full-screen vi-style browser of every word you've collected.
+
+| Key | Action |
+|-----|--------|
+| `j` / `↓` | Move down |
+| `k` / `↑` | Move up |
+| `g` / `G` | Jump to top / bottom |
+| `/` | Enter search — live-filters by word or definition |
+| `Esc` | Clear search (in search mode) or exit |
+| `Enter` | Commit search; or select a word to view full details |
+| `q` | Quit |
+
+Selecting a word shows its full definition, pronunciation, usage examples with citations, literary quotes from Google Books, and review stats.
+
 ## Project structure
 
 ```
-app.py          Entry point / orchestrator
+app.py              Entry point / orchestrator
 vocab/
-  db.py         SQLite layer (words, daily_games, review_queue)
-  fetcher.py    M-W RSS fetch + parse → WordEntry
-  game.py       Daily 3-try game loop
-  review.py     Spaced-repetition review session
-  display.py    All rich terminal rendering
-data/vocab.db   Auto-created SQLite database
+  db.py             SQLite layer (words, daily_games, review_queue)
+  fetcher.py        M-W RSS fetch + parse → WordEntry
+  game.py           Daily 3-try game loop
+  review.py         Spaced-repetition review session
+  history.py        Vi-style word history browser
+  display.py        All rich terminal rendering
+  audio.py          Pronunciation playback via gTTS + ffplay
+  literature.py     Google Books literary quote fetcher
+data/vocab.db       Auto-created SQLite database
 ```
