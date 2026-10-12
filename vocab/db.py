@@ -11,7 +11,9 @@ CREATE TABLE IF NOT EXISTS words (
     definition      TEXT NOT NULL,
     part_of_speech  TEXT NOT NULL,
     letter_count    INTEGER NOT NULL,
-    pronunciation   TEXT NOT NULL DEFAULT ''
+    pronunciation   TEXT NOT NULL DEFAULT '',
+    examples        TEXT NOT NULL DEFAULT '',
+    did_you_know    TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS daily_games (
@@ -46,15 +48,24 @@ def init_db(db_path: Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
 
 def _migrate(conn: sqlite3.Connection) -> None:
     existing = {row[1] for row in conn.execute("PRAGMA table_info(words)")}
-    if "pronunciation" not in existing:
-        conn.execute("ALTER TABLE words ADD COLUMN pronunciation TEXT NOT NULL DEFAULT ''")
+    for col, defn in [
+        ("pronunciation", "TEXT NOT NULL DEFAULT ''"),
+        ("examples",      "TEXT NOT NULL DEFAULT ''"),
+        ("did_you_know",  "TEXT NOT NULL DEFAULT ''"),
+    ]:
+        if col not in existing:
+            conn.execute(f"ALTER TABLE words ADD COLUMN {col} {defn}")
 
 
 def upsert_word(conn: sqlite3.Connection, entry) -> None:
     conn.execute(
-        "INSERT OR IGNORE INTO words (word, date, definition, part_of_speech, letter_count, pronunciation) "
-        "VALUES (?, ?, ?, ?, ?, ?)",
-        (entry.word, entry.date.isoformat(), entry.definition, entry.part_of_speech, entry.letter_count, entry.pronunciation),
+        "INSERT OR IGNORE INTO words "
+        "(word, date, definition, part_of_speech, letter_count, pronunciation, examples, did_you_know) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            entry.word, entry.date.isoformat(), entry.definition, entry.part_of_speech,
+            entry.letter_count, entry.pronunciation, entry.examples, entry.did_you_know,
+        ),
     )
     conn.commit()
 
@@ -88,7 +99,7 @@ def save_daily_game(
 def get_due_reviews(conn: sqlite3.Connection, today: date) -> list[sqlite3.Row]:
     return conn.execute(
         "SELECT r.word, r.next_review, r.interval_days, r.last_result, r.review_count, "
-        "w.definition, w.part_of_speech, w.letter_count "
+        "w.definition, w.part_of_speech, w.letter_count, w.pronunciation, w.examples, w.did_you_know "
         "FROM review_queue r JOIN words w ON r.word = w.word "
         "WHERE r.next_review <= ? ORDER BY r.next_review",
         (today.isoformat(),),

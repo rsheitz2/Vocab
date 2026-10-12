@@ -20,9 +20,13 @@ def run_daily_game(conn: sqlite3.Connection, entry: WordEntry, console: Console)
         display.show_puzzle(entry, hint_level=attempt, console=console)
         try:
             while True:
-                guess = console.input("[bold]Your guess[/bold] [dim]('p' to pronounce)[/dim]: ").strip().lower()
+                guess = console.input(
+                    "[bold]Your guess[/bold] [dim]('p' pronounce · 'e' examples)[/dim]: "
+                ).strip().lower()
                 if guess == "p":
                     audio.play_word(entry.word, console)
+                elif guess == "e":
+                    display.show_examples(entry, console)
                 else:
                     break
         except (EOFError, KeyboardInterrupt):

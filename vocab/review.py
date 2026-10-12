@@ -24,9 +24,13 @@ def run_review_session(
         display.show_review_puzzle(word_row, console)
         try:
             while True:
-                guess = console.input("[bold]Your guess[/bold] [dim]('p' to pronounce)[/dim]: ").strip().lower()
+                guess = console.input(
+                    "[bold]Your guess[/bold] [dim]('p' pronounce · 'e' examples)[/dim]: "
+                ).strip().lower()
                 if guess == "p":
                     audio.play_word(word, console)
+                elif guess == "e":
+                    display.show_examples(word_row, console)
                 else:
                     break
         except (EOFError, KeyboardInterrupt):

@@ -82,6 +82,55 @@ def show_already_played(row, console: Console) -> None:
     )
 
 
+_PHONETIC_GUIDE = (
+    "[bold yellow]Phonetic key:[/bold yellow]  "
+    "UPPERCASE = stressed syllable  ·  hyphens separate syllables\n"
+    "Common sounds:  [cyan]ay[/cyan]=ace  [cyan]a[/cyan]=at  [cyan]ah[/cyan]=father  "
+    "[cyan]aw[/cyan]=law  [cyan]ee[/cyan]=easy  [cyan]i[/cyan]=hit  [cyan]eye[/cyan]=ice  "
+    "[cyan]oh[/cyan]=go  [cyan]oo[/cyan]=rule  [cyan]ow[/cyan]=now  [cyan]oy[/cyan]=boy  "
+    "[cyan]uh[/cyan]=up  [cyan]sh[/cyan]=shy  [cyan]ch[/cyan]=chin  [cyan]th[/cyan]=thin  "
+    "[cyan]zh[/cyan]=vision  [cyan]ng[/cyan]=sing"
+)
+
+
+def show_examples(entry_or_row, console: Console) -> None:
+    pronunciation = _get(entry_or_row, "pronunciation")
+    examples_raw = _get(entry_or_row, "examples")
+    did_you_know = _get(entry_or_row, "did_you_know")
+
+    lines: list[Text] = []
+
+    if pronunciation:
+        lines.append(Text(f"Pronunciation:  {pronunciation}", style="bold white"))
+        lines.append(Text(_PHONETIC_GUIDE))
+        lines.append(Text(""))
+
+    if examples_raw:
+        lines.append(Text("Examples:", style="bold yellow"))
+        for ex in examples_raw.split("\n"):
+            ex = ex.strip()
+            if ex:
+                lines.append(Text(f"  • {ex}", style="white"))
+        lines.append(Text(""))
+
+    if did_you_know:
+        lines.append(Text("Did you know?", style="bold yellow"))
+        lines.append(Text(did_you_know, style="white"))
+
+    if not lines:
+        console.print("[dim]No extra information available.[/dim]")
+        return
+
+    body = Text("\n").join(lines)
+    console.print(Panel(body, title="[bold]More Info[/bold]", border_style="yellow"))
+
+
+def _get(obj, key: str) -> str:
+    if isinstance(obj, dict) or hasattr(obj, "keys"):
+        return obj[key] if key in obj.keys() else ""
+    return getattr(obj, key, "")
+
+
 def show_stats(stats: dict, console: Console) -> None:
     body = (
         f"[cyan]Words collected:[/cyan] {stats['total_words']}  · "

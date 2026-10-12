@@ -21,6 +21,8 @@ class WordEntry:
     part_of_speech: str
     letter_count: int
     pronunciation: str = ""
+    examples: str = ""
+    did_you_know: str = ""
 
 
 def _parse_entry(item: ET.Element) -> WordEntry:
@@ -53,6 +55,17 @@ def _parse_entry(item: ET.Element) -> WordEntry:
     if not definition:
         raise FetchError("Could not extract definition from RSS description")
 
+    examples = []
+    did_you_know = ""
+    for p in paragraphs[3:]:
+        text = p.get_text().strip()
+        if text.startswith("//"):
+            examples.append(text[2:].strip())
+        elif text.startswith('"') and text.endswith('"') and len(text) > 20:
+            examples.append(text)
+        elif text.lower().startswith("did you know"):
+            did_you_know = text.split("\n", 1)[-1].strip()
+
     return WordEntry(
         word=title,
         date=wotd_date,
@@ -60,6 +73,8 @@ def _parse_entry(item: ET.Element) -> WordEntry:
         part_of_speech=part_of_speech,
         letter_count=len(title),
         pronunciation=pronunciation,
+        examples="\n".join(examples),
+        did_you_know=did_you_know,
     )
 
 
