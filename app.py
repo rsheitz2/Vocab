@@ -8,6 +8,7 @@ from rich.text import Text
 from vocab import db, display
 from vocab.fetcher import fetch_wotd, FetchError
 from vocab.game import run_daily_game
+from vocab.history import browse_words
 from vocab.review import run_review_session
 
 console = Console()
@@ -23,15 +24,22 @@ _HELP = """[bold blue]Vocab[/bold blue] — a daily word-guessing game powered b
     Try 2 — + part of speech            (e.g. [yellow]noun[/yellow])
     Try 3 — + first letter              (e.g. [cyan]N _ _ _ _[/cyan])
 
+  At any guess prompt: [bold]p[/bold] = hear pronunciation · [bold]e[/bold] = examples, phonetic guide & etymology
+
 [bold]Review mode[/bold]
   After the daily game, past words due for review appear automatically.
   You get [bold]1 try[/bold] per review word (definition + letter count only).
   [green]Correct[/green] → word comes back later (interval doubles, max 60 days).
   [red]Wrong[/red]   → word comes back sooner (interval halves, min 1 day).
 
+[bold]Word history[/bold]
+  Browse every past word in a searchable list. Select a word to see its full
+  definition, examples, and review stats.
+
 [bold]Usage[/bold]
-  [dim]./vocab.sh start[/dim]   Play today's game
-  [dim]./vocab.sh[/dim]         Show this help"""
+  [dim]./vocab.sh start[/dim]     Play today's game
+  [dim]./vocab.sh history[/dim]   Browse past words (vi-style)
+  [dim]./vocab.sh[/dim]           Show this help"""
 
 
 def show_help() -> None:
@@ -39,10 +47,16 @@ def show_help() -> None:
 
 
 def main() -> None:
-    if "start" not in sys.argv:
+    args = sys.argv[1:]
+    if not args or args[0] not in ("start", "history"):
         show_help()
         return
+
     conn = db.init_db()
+
+    if args[0] == "history":
+        browse_words(conn, console)
+        return
 
     try:
         entry = fetch_wotd(conn)

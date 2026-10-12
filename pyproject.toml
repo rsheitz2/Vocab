@@ -8,6 +8,7 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "rich>=13.0",
     "gtts>=2.5",
+    "prompt-toolkit>=3.0",
 ]
 
 [project.optional-dependencies]
