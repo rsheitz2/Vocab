@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+data/vocab.db
+.pytest_cache/
