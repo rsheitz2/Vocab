@@ -12,9 +12,16 @@ Each day you get a new word to guess. You're shown the **definition** and the **
 | 2 | + Part of speech (e.g. *noun*) |
 | 3 | + First letter (e.g. `N _ _ _ _`) |
 
+At any guess prompt you can use these commands instead of guessing — they don't cost a try:
+
+| Command | Action |
+|---------|--------|
+| `p` | Play the word's pronunciation aloud |
+| `e` | Show usage examples, a phonetic sound key, and the word's etymology |
+
 ## Review mode
 
-After the daily game, past words due for review appear automatically — **1 try each**.
+After the daily game, past words due for review appear automatically — **1 try each**. The same `p` and `e` commands are available during review.
 
 - **Correct** → word comes back later (interval doubles, max 60 days)
 - **Wrong** → word comes back sooner (interval halves, min 1 day)
@@ -26,13 +33,13 @@ Words start with a 1-day interval (reviewed the day after you first see them).
 ```bash
 cd ~/Documents/Projects/Vocab
 uv sync
-uv run python app.py
 ```
 
-Show in-app help:
+Then use the included script:
 
 ```bash
-uv run python app.py --help
+./vocab.sh          # show help
+./vocab.sh start    # play today's game
 ```
 
 ## Run tests
