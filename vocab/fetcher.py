@@ -20,6 +20,7 @@ class WordEntry:
     definition: str
     part_of_speech: str
     letter_count: int
+    pronunciation: str = ""
 
 
 def _parse_entry(item: ET.Element) -> WordEntry:
@@ -45,6 +46,9 @@ def _parse_entry(item: ET.Element) -> WordEntry:
     em_tag = paragraphs[1].find("em")
     part_of_speech = em_tag.get_text().strip() if em_tag else "unknown"
 
+    header_parts = paragraphs[1].get_text().split("•")
+    pronunciation = header_parts[1].strip() if len(header_parts) >= 3 else ""
+
     definition = paragraphs[2].get_text().strip()
     if not definition:
         raise FetchError("Could not extract definition from RSS description")
@@ -55,6 +59,7 @@ def _parse_entry(item: ET.Element) -> WordEntry:
         definition=definition,
         part_of_speech=part_of_speech,
         letter_count=len(title),
+        pronunciation=pronunciation,
     )
 
 

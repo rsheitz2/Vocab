@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS words (
     date            TEXT NOT NULL,
     definition      TEXT NOT NULL,
     part_of_speech  TEXT NOT NULL,
-    letter_count    INTEGER NOT NULL
+    letter_count    INTEGER NOT NULL,
+    pronunciation   TEXT NOT NULL DEFAULT ''
 );
 
 CREATE TABLE IF NOT EXISTS daily_games (
@@ -38,15 +39,22 @@ def init_db(db_path: Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     conn.executescript(_SCHEMA)
+    _migrate(conn)
     conn.commit()
     return conn
 
 
+def _migrate(conn: sqlite3.Connection) -> None:
+    existing = {row[1] for row in conn.execute("PRAGMA table_info(words)")}
+    if "pronunciation" not in existing:
+        conn.execute("ALTER TABLE words ADD COLUMN pronunciation TEXT NOT NULL DEFAULT ''")
+
+
 def upsert_word(conn: sqlite3.Connection, entry) -> None:
     conn.execute(
-        "INSERT OR IGNORE INTO words (word, date, definition, part_of_speech, letter_count) "
-        "VALUES (?, ?, ?, ?, ?)",
-        (entry.word, entry.date.isoformat(), entry.definition, entry.part_of_speech, entry.letter_count),
+        "INSERT OR IGNORE INTO words (word, date, definition, part_of_speech, letter_count, pronunciation) "
+        "VALUES (?, ?, ?, ?, ?, ?)",
+        (entry.word, entry.date.isoformat(), entry.definition, entry.part_of_speech, entry.letter_count, entry.pronunciation),
     )
     conn.commit()
 

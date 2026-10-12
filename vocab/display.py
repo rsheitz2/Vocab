@@ -25,7 +25,10 @@ def show_puzzle(entry, hint_level: int, console: Console) -> None:
 
     lines.append(Text(""))
     blank = show_blank(entry.word, first_letter=(hint_level >= 3))
-    lines.append(Text(f"Letters: {entry.letter_count}  →  {blank}", style="cyan bold"))
+    hint_line = Text(f"Letters: {entry.letter_count}  →  {blank}", style="cyan bold")
+    if getattr(entry, "pronunciation", ""):
+        hint_line.append(f"   {entry.pronunciation}", style="dim")
+    lines.append(hint_line)
 
     body = Text("\n").join(lines)
     title = f"[bold blue]Vocab[/bold blue] · Guess #{hint_level}"

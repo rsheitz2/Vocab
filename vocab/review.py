@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from rich.console import Console
 
-from vocab import db, display
+from vocab import audio, db, display
 
 
 @dataclass
@@ -23,7 +23,12 @@ def run_review_session(
         word = word_row["word"]
         display.show_review_puzzle(word_row, console)
         try:
-            guess = console.input("[bold]Your guess:[/bold] ").strip().lower()
+            while True:
+                guess = console.input("[bold]Your guess[/bold] [dim]('p' to pronounce)[/dim]: ").strip().lower()
+                if guess == "p":
+                    audio.play_word(word, console)
+                else:
+                    break
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Review interrupted.[/dim]")
             break

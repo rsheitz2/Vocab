@@ -7,6 +7,7 @@ dependencies = [
     "requests>=2.31",
     "beautifulsoup4>=4.12",
     "rich>=13.0",
+    "gtts>=2.5",
 ]
 
 [project.optional-dependencies]

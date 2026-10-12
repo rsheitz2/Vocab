@@ -4,7 +4,7 @@ from datetime import date
 
 from rich.console import Console
 
-from vocab import db, display
+from vocab import audio, db, display
 from vocab.fetcher import WordEntry
 
 
@@ -19,7 +19,12 @@ def run_daily_game(conn: sqlite3.Connection, entry: WordEntry, console: Console)
     for attempt in range(1, 4):
         display.show_puzzle(entry, hint_level=attempt, console=console)
         try:
-            guess = console.input("[bold]Your guess:[/bold] ").strip().lower()
+            while True:
+                guess = console.input("[bold]Your guess[/bold] [dim]('p' to pronounce)[/dim]: ").strip().lower()
+                if guess == "p":
+                    audio.play_word(entry.word, console)
+                else:
+                    break
         except (EOFError, KeyboardInterrupt):
             console.print("\n[dim]Game interrupted. Re-run to continue.[/dim]")
             raise
