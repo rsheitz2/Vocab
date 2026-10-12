@@ -93,7 +93,7 @@ _PHONETIC_GUIDE = (
 )
 
 
-def show_examples(entry_or_row, console: Console) -> None:
+def show_examples(entry_or_row, literary_examples: list[dict], console: Console, *, rate_limited: bool = False) -> None:
     pronunciation = _get(entry_or_row, "pronunciation")
     examples_raw = _get(entry_or_row, "examples")
     did_you_know = _get(entry_or_row, "did_you_know")
@@ -109,8 +109,39 @@ def show_examples(entry_or_row, console: Console) -> None:
         lines.append(Text("Examples:", style="bold yellow"))
         for ex in examples_raw.split("\n"):
             ex = ex.strip()
-            if ex:
+            if not ex:
+                continue
+            if " — " in ex:
+                quote, citation = ex.rsplit(" — ", 1)
+                t = Text(f"  {quote.strip()}", style="white italic")
+                t.append(f"\n  — {citation.strip()}", style="dim")
+                lines.append(t)
+            else:
                 lines.append(Text(f"  • {ex}", style="white"))
+        lines.append(Text(""))
+
+    if literary_examples:
+        lines.append(Text("In literature & published works:", style="bold yellow"))
+        for lit in literary_examples:
+            snippet = lit.get("snippet", "").strip()
+            title = lit.get("title", "")
+            author = lit.get("author", "")
+            year = lit.get("year", "")
+            citation_parts = [p for p in [author, title, year] if p]
+            citation = ", ".join(citation_parts)
+            t = Text(f"  {snippet}", style="white italic")
+            t.append(f"\n  — {citation}", style="dim")
+            lines.append(t)
+            lines.append(Text(""))
+    elif rate_limited:
+        lines.append(
+            Text(
+                "Literary examples unavailable right now (API rate limit).\n"
+                "Set GOOGLE_BOOKS_API_KEY in your environment for reliable access.\n"
+                "Get a free key at: console.cloud.google.com/apis/library/books.googleapis.com",
+                style="dim yellow",
+            )
+        )
         lines.append(Text(""))
 
     if did_you_know:

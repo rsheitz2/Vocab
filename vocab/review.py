@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 from rich.console import Console
 
-from vocab import audio, db, display
+from vocab import audio, db, display, literature
 
 
 @dataclass
@@ -30,7 +30,8 @@ def run_review_session(
                 if guess == "p":
                     audio.play_word(word, console)
                 elif guess == "e":
-                    display.show_examples(word_row, console)
+                    lit, rate_limited = literature.get_or_fetch(conn, word)
+                    display.show_examples(word_row, lit, console, rate_limited=rate_limited)
                 else:
                     break
         except (EOFError, KeyboardInterrupt):

@@ -61,7 +61,8 @@ def _parse_entry(item: ET.Element) -> WordEntry:
         text = p.get_text().strip()
         if text.startswith("//"):
             examples.append(text[2:].strip())
-        elif text.startswith('"') and text.endswith('"') and len(text) > 20:
+        elif text.startswith(('"', '“')) and len(text) > 20 and " — " in text:
+            # Real-world quote with citation: "text..." — Author, Publication, Date
             examples.append(text)
         elif text.lower().startswith("did you know"):
             did_you_know = text.split("\n", 1)[-1].strip()

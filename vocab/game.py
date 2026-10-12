@@ -4,7 +4,7 @@ from datetime import date
 
 from rich.console import Console
 
-from vocab import audio, db, display
+from vocab import audio, db, display, literature
 from vocab.fetcher import WordEntry
 
 
@@ -26,7 +26,8 @@ def run_daily_game(conn: sqlite3.Connection, entry: WordEntry, console: Console)
                 if guess == "p":
                     audio.play_word(entry.word, console)
                 elif guess == "e":
-                    display.show_examples(entry, console)
+                    lit, rate_limited = literature.get_or_fetch(conn, entry.word)
+                    display.show_examples(entry, lit, console, rate_limited=rate_limited)
                 else:
                     break
         except (EOFError, KeyboardInterrupt):
