@@ -40,6 +40,8 @@ _HELP = """[bold blue]Vocab[/bold blue] — a daily word-guessing game powered b
 [bold]Usage[/bold]
   [dim]./vocab.sh start[/dim]     Play today's game
   [dim]./vocab.sh history[/dim]   Browse past words (vi-style)
+  [dim]./vocab.sh review[/dim]    Review words due today (skips the daily game)
+  [dim]./vocab.sh review --all[/dim]  Review every saved word, due or not
   [dim]./vocab.sh[/dim]           Show this help"""
 
 
@@ -49,7 +51,7 @@ def show_help() -> None:
 
 def main() -> None:
     args = sys.argv[1:]
-    if not args or args[0] not in ("start", "history"):
+    if not args or args[0] not in ("start", "history", "review"):
         show_help()
         return
 
@@ -57,6 +59,10 @@ def main() -> None:
 
     if args[0] == "history":
         browse_words(conn, console)
+        return
+
+    if args[0] == "review":
+        run_reviews(conn, all_words="--all" in args[1:])
         return
 
     try:
@@ -81,15 +87,25 @@ def main() -> None:
             run_daily_game(conn, entry, console)
 
     console.print()
-    due = db.get_due_reviews(conn, today)
-    if due:
-        console.print(f"[bold]Review time:[/bold] {len(due)} word(s) due today.\n")
-        result = run_review_session(conn, due, console)
+    run_reviews(conn)
+
+
+def run_reviews(conn, all_words: bool = False) -> None:
+    if all_words:
+        words = db.get_all_reviews(conn)
+        label, empty = "saved", "[dim]No saved words yet.[/dim]\n"
+    else:
+        words = db.get_due_reviews(conn, date.today())
+        label, empty = "due today", "[dim]No reviews due today.[/dim]\n"
+
+    if words:
+        console.print(f"[bold]Review time:[/bold] {len(words)} word(s) {label}.\n")
+        result = run_review_session(conn, words, console)
         console.print(
             f"[bold]Review complete:[/bold] {result.correct}/{result.total} correct\n"
         )
     else:
-        console.print("[dim]No reviews due today.[/dim]\n")
+        console.print(empty)
 
     display.show_stats(db.get_stats(conn), console)
 

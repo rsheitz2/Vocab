@@ -103,14 +103,22 @@ def save_daily_game(
     conn.commit()
 
 
+_REVIEW_SELECT = (
+    "SELECT r.word, r.next_review, r.interval_days, r.last_result, r.review_count, "
+    "w.definition, w.part_of_speech, w.letter_count, w.pronunciation, w.examples, w.did_you_know, w.literary_examples "
+    "FROM review_queue r JOIN words w ON r.word = w.word "
+)
+
+
 def get_due_reviews(conn: sqlite3.Connection, today: date) -> list[sqlite3.Row]:
     return conn.execute(
-        "SELECT r.word, r.next_review, r.interval_days, r.last_result, r.review_count, "
-        "w.definition, w.part_of_speech, w.letter_count, w.pronunciation, w.examples, w.did_you_know, w.literary_examples "
-        "FROM review_queue r JOIN words w ON r.word = w.word "
-        "WHERE r.next_review <= ? ORDER BY r.next_review",
+        _REVIEW_SELECT + "WHERE r.next_review <= ? ORDER BY r.next_review",
         (today.isoformat(),),
     ).fetchall()
+
+
+def get_all_reviews(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    return conn.execute(_REVIEW_SELECT + "ORDER BY r.next_review").fetchall()
 
 
 def update_review(conn: sqlite3.Connection, word: str, correct: bool) -> None:

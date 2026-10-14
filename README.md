@@ -41,6 +41,8 @@ Then use the included script:
 ./vocab.sh             # show help
 ./vocab.sh start       # play today's game
 ./vocab.sh history     # browse past words
+./vocab.sh review      # review only the words due today
+./vocab.sh review --all  # review every saved word, due or not
 ```
 
 ## Run tests

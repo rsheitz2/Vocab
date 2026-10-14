@@ -9,6 +9,7 @@ from vocab.db import (
     get_daily_game,
     save_daily_game,
     get_due_reviews,
+    get_all_reviews,
     update_review,
     get_word,
     get_stats,
@@ -94,6 +95,19 @@ def test_get_due_reviews_filters_by_date(conn):
     due = get_due_reviews(conn, today)
     assert len(due) == 1
     assert due[0]["word"] == "nexus"
+
+
+def test_get_all_reviews_ignores_date(conn):
+    today = date(2026, 10, 12)
+    for word, review_date in [("vapid", today + timedelta(days=5)), ("nexus", today)]:
+        upsert_word(conn, _entry(word=word, wotd_date=today))
+        conn.execute(
+            "INSERT OR IGNORE INTO review_queue (word, next_review, interval_days) VALUES (?, ?, 1)",
+            (word, review_date.isoformat()),
+        )
+    conn.commit()
+    words = [r["word"] for r in get_all_reviews(conn)]
+    assert words == ["nexus", "vapid"]
 
 
 def test_update_review_correct_doubles(conn):
