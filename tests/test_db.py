@@ -44,6 +44,25 @@ def test_upsert_word_idempotent(conn):
     assert count == 1
 
 
+def test_upsert_word_backfills_empty_pronunciation(conn):
+    upsert_word(conn, _entry())
+    entry = _entry()
+    entry.pronunciation = "\\NEK-sus\\"
+    upsert_word(conn, entry)
+    row = conn.execute("SELECT pronunciation FROM words WHERE word='nexus'").fetchone()
+    assert row[0] == "\\NEK-sus\\"
+
+
+def test_upsert_word_keeps_existing_pronunciation(conn):
+    entry = _entry()
+    entry.pronunciation = "\\NEK-sus\\"
+    upsert_word(conn, entry)
+    entry.pronunciation = "\\other\\"
+    upsert_word(conn, entry)
+    row = conn.execute("SELECT pronunciation FROM words WHERE word='nexus'").fetchone()
+    assert row[0] == "\\NEK-sus\\"
+
+
 def test_seed_review_queue_sets_interval_1(conn):
     entry = _entry()
     upsert_word(conn, entry)

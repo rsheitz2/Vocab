@@ -1,4 +1,5 @@
 import sqlite3
+import threading
 
 from prompt_toolkit import Application
 from prompt_toolkit.filters import Condition
@@ -11,6 +12,8 @@ from prompt_toolkit.styles import Style
 from rich.console import Console
 from rich.panel import Panel
 
+from vocab import audio
+
 _STYLE = Style.from_dict({
     "header":     "bg:#003566 #ffffff bold",
     "footer":     "bg:#001d3d #aaaaaa",
@@ -21,13 +24,14 @@ _STYLE = Style.from_dict({
     "word":       "#90e0ef bold",
     "date":       "#888888",
     "definition": "#cccccc",
+    "pron":       "#ffd60a",
     "search":     "bg:#001d3d #ffffff",
     "search-bar": "bg:#001d3d #ffd60a bold",
 })
 
 _HEADER = (
     "  Vocab History"
-    "   [j/k] navigate  [/] search  [Enter] select  [Esc/q] quit  "
+    "   [j/k] navigate  [p] pronounce  [/] search  [Enter] select  [Esc/q] quit  "
 )
 
 
@@ -56,7 +60,7 @@ def browse_words(conn: sqlite3.Connection, console: Console) -> None:
         console.print("[dim]No words in history yet.[/dim]")
         return
 
-    state = {"cursor": 0, "query": "", "search": False, "selected": None}
+    state = {"cursor": 0, "query": "", "search": False, "selected": None, "status": ""}
 
     def filtered() -> list:
         if not state["query"]:
@@ -81,15 +85,16 @@ def browse_words(conn: sqlite3.Connection, console: Console) -> None:
 
             word = row["word"].ljust(18)
             date = (row["date"] or "          ")[:10]
+            pron = (row["pronunciation"] or "").ljust(16)
             defn = row["definition"]
-            preview = (defn[:52] + "…") if len(defn) > 52 else defn
+            preview = (defn[:40] + "…") if len(defn) > 40 else defn
 
             if sel:
-                line = f" ▶  {word}  {date}  "
+                line = f" ▶  {word}  {pron}  {date}  "
                 out += [("class:selected", line), ("class:selected", badge[1]),
                         ("class:selected", f"  {preview}\n")]
             else:
-                out += [("", f"    {word}  {date}  "), badge,
+                out += [("", f"    {word}  "), ("class:pron", f"{pron}  "), ("", f"{date}  "), badge,
                         ("class:definition", f"  {preview}\n")]
 
         if not rows:
@@ -104,6 +109,8 @@ def browse_words(conn: sqlite3.Connection, console: Console) -> None:
         label = f"  {shown}/{total} words"
         if state["query"]:
             label += f'  (filter: "{state["query"]}"  Esc to clear)'
+        if state["status"]:
+            label += f"  ·  {state['status']}"
         return [("class:footer", label)]
 
     kb = KeyBindings()
@@ -129,6 +136,26 @@ def browse_words(conn: sqlite3.Connection, console: Console) -> None:
     def _bottom(event):
         rows = filtered()
         state["cursor"] = max(0, len(rows) - 1)
+
+    @kb.add("p", filter=normal)
+    def _pronounce(event):
+        rows = filtered()
+        if not rows:
+            return
+        word = rows[state["cursor"]]["word"]
+        app = event.app
+        state["status"] = f"♪ {word}…"
+
+        def _play():
+            # Run off the UI thread so the browser stays responsive while audio loads/plays
+            try:
+                audio.speak(word)
+                state["status"] = ""
+            except Exception as exc:
+                state["status"] = f"Could not play audio: {exc}"
+            app.invalidate()
+
+        threading.Thread(target=_play, daemon=True).start()
 
     @kb.add("/", filter=normal)
     def _enter_search(event):
@@ -233,3 +260,14 @@ def _show_detail(row, conn: sqlite3.Connection, console: Console) -> None:
         f"Reviews: [cyan]{reviews}[/cyan]"
     )
     console.print(Panel(stats_line, title="[dim]Stats[/dim]", border_style="dim"))
+
+    try:
+        while True:
+            choice = console.input(
+                "[dim]'p' pronounce · Enter to exit[/dim]: "
+            ).strip().lower()
+            if choice != "p":
+                break
+            audio.play_word(word, console)
+    except (EOFError, KeyboardInterrupt):
+        console.print()

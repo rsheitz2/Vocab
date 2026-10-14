@@ -61,9 +61,14 @@ def _migrate(conn: sqlite3.Connection) -> None:
 
 def upsert_word(conn: sqlite3.Connection, entry) -> None:
     conn.execute(
-        "INSERT OR IGNORE INTO words "
+        "INSERT INTO words "
         "(word, date, definition, part_of_speech, letter_count, pronunciation, examples, did_you_know) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+        # Backfill fields that were empty when the word was first stored (e.g. pre-migration rows)
+        "ON CONFLICT(word) DO UPDATE SET "
+        "pronunciation = CASE WHEN words.pronunciation = '' THEN excluded.pronunciation ELSE words.pronunciation END, "
+        "examples      = CASE WHEN words.examples      = '' THEN excluded.examples      ELSE words.examples      END, "
+        "did_you_know  = CASE WHEN words.did_you_know  = '' THEN excluded.did_you_know  ELSE words.did_you_know  END",
         (
             entry.word, entry.date.isoformat(), entry.definition, entry.part_of_speech,
             entry.letter_count, entry.pronunciation, entry.examples, entry.did_you_know,

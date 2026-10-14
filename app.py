@@ -33,8 +33,9 @@ _HELP = """[bold blue]Vocab[/bold blue] — a daily word-guessing game powered b
   [red]Wrong[/red]   → word comes back sooner (interval halves, min 1 day).
 
 [bold]Word history[/bold]
-  Browse every past word in a searchable list. Select a word to see its full
-  definition, examples, and review stats.
+  Browse every past word in a searchable list with its pronunciation.
+  Press [bold]p[/bold] to hear a word; select it to see its full definition,
+  examples, and review stats.
 
 [bold]Usage[/bold]
   [dim]./vocab.sh start[/dim]     Play today's game

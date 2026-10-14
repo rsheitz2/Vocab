@@ -59,12 +59,13 @@ uv run pytest tests/ -v -m network         # live M-W RSS fetch test
 | `j` / `↓` | Move down |
 | `k` / `↑` | Move up |
 | `g` / `G` | Jump to top / bottom |
+| `p` | Hear the highlighted word's pronunciation |
 | `/` | Enter search — live-filters by word or definition |
 | `Esc` | Clear search (in search mode) or exit |
 | `Enter` | Commit search; or select a word to view full details |
 | `q` | Quit |
 
-Selecting a word shows its full definition, pronunciation, usage examples with citations, literary quotes from Google Books, and review stats.
+Each row shows the word's phonetic pronunciation. Selecting a word shows its full definition, pronunciation, usage examples with citations, literary quotes from Google Books, and review stats — then press `p` to hear it.
 
 ## Project structure
 
