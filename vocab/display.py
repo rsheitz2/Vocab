@@ -5,9 +5,29 @@ from rich.panel import Panel
 from rich.text import Text
 
 
+_SUFFIXES = r"(?:s|es|d|ed|ing|er|ers|est|ly)"
+
+
 def _redact(definition: str, word: str) -> str:
+    # Blank the word and its inflections (absconded, absconds, baking, carried, planned),
+    # keeping the ending visible so the sentence still reads naturally
+    w = re.escape(word)
+    stems = [rf"(?P<base>{w}){_SUFFIXES}?"]
+    lower = word.lower()
+    if lower.endswith("e"):
+        stems.append(rf"(?P<drop_e>{re.escape(word[:-1])}){_SUFFIXES}")      # bake → baking
+    if lower.endswith("y"):
+        stems.append(rf"(?P<y_to_i>{re.escape(word[:-1])}i){_SUFFIXES}")      # carry → carried
+    if re.search(r"[^aeiou][aeiou][b-df-hj-np-tv-z]$", lower):
+        stems.append(rf"(?P<double>{w}{re.escape(word[-1])}){_SUFFIXES}")     # plan → planned
+    pattern = re.compile(rf"\b(?:{'|'.join(stems)})\b", flags=re.IGNORECASE)
     blank = "_" * len(word)
-    return re.sub(rf"\b{re.escape(word)}\b", blank, definition, flags=re.IGNORECASE)
+
+    def repl(m: re.Match) -> str:
+        stem = next(v for v in m.groupdict().values() if v is not None)
+        return blank + m.group(0)[len(stem):]
+
+    return pattern.sub(repl, definition)
 
 
 def show_blank(word: str, first_letter: bool = False) -> str:

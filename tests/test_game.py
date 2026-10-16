@@ -73,3 +73,18 @@ def test_game_writes_daily_game_row(conn):
     assert row is not None
     assert row["completed"] == 1
     assert row["word"] == "nexus"
+
+
+@pytest.mark.parametrize("word,definition,expected", [
+    ("nexus", "A nexus is a link. Nexus can also mean a center.",
+     "A _____ is a link. _____ can also mean a center."),
+    ("abscond", "Someone is said to have absconded. He absconds.",
+     "Someone is said to have _______ed. He _______s."),
+    ("bake", "She baked bread while baking pies.", "She ____d bread while ____ing pies."),
+    ("carry", "He carried it.", "He _____ed it."),
+    ("plan", "They planned ahead.", "They ____ed ahead."),
+    ("art", "A party of artists.", "A party of artists."),
+])
+def test_redact_blanks_inflections(word, definition, expected):
+    from vocab.display import _redact
+    assert _redact(definition, word) == expected
