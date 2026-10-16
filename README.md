@@ -15,6 +15,8 @@ Each day you get a new word to guess. You're shown the **definition** and the **
 | 5 | + Second letter (e.g. `N E _ _ S`) |
 | 6 | + Middle letter (e.g. `N E X _ S`) |
 
+Each wrong guess is listed under the clue with its letters colored Wordle-style: **green** = right letter in the right spot, **yellow** = in the word but in a different spot, **gray** = not in the word.
+
 At any guess prompt you can use these commands instead of guessing — they don't cost a try:
 
 | Command | Action |

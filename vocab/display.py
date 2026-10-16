@@ -44,7 +44,23 @@ def show_blank(word: str, revealed: int = 0) -> str:
     return " ".join(c.upper() if i in shown else "_" for i, c in enumerate(word))
 
 
-def show_puzzle(entry, hint_level: int, console: Console) -> None:
+_GUESS_STYLES = {
+    "correct": "bold black on green",
+    "present": "bold black on yellow",
+    "absent":  "bold white on grey35",
+}
+
+
+def _render_guess(scored: list[tuple[str, str]]) -> Text:
+    line = Text()
+    for i, (letter, status) in enumerate(scored):
+        if i:
+            line.append(" ")
+        line.append(f" {letter.upper()} ", style=_GUESS_STYLES[status])
+    return line
+
+
+def show_puzzle(entry, hint_level: int, console: Console, guesses: list | None = None) -> None:
     lines = [Text(_redact(entry.definition, entry.word), style="white")]
 
     if hint_level >= 2:
@@ -54,6 +70,11 @@ def show_puzzle(entry, hint_level: int, console: Console) -> None:
     lines.append(Text(""))
     blank = show_blank(entry.word, revealed=max(hint_level - 2, 0))
     lines.append(Text(f"Letters: {entry.letter_count}  →  {blank}", style="cyan bold"))
+
+    if guesses:
+        lines.append(Text(""))
+        lines.append(Text("Previous guesses:", style="dim"))
+        lines.extend(_render_guess(g) for g in guesses)
 
     body = Text("\n").join(lines)
     title = f"[bold blue]Vocab[/bold blue] · Guess #{hint_level}"

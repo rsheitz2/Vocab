@@ -27,6 +27,11 @@ _HELP = """[bold blue]Vocab[/bold blue] — a daily word-guessing game powered b
     Try 5 — + second letter             (e.g. [cyan]N E _ _ S[/cyan])
     Try 6 — + middle letter             (e.g. [cyan]N E X _ S[/cyan])
 
+  Each wrong guess is shown with colored letters:
+    [bold black on green] A [/bold black on green]  right letter, right spot
+    [bold black on yellow] A [/bold black on yellow]  in the word, wrong spot
+    [bold white on grey35] A [/bold white on grey35]  not in the word
+
   At any guess prompt: [bold]p[/bold] = hear pronunciation · [bold]e[/bold] = examples, phonetic guide & etymology
 
 [bold]Review mode[/bold]

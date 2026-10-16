@@ -6,7 +6,7 @@ import pytest
 from vocab.db import init_db, upsert_word, seed_review_queue, get_daily_game
 from vocab.display import show_blank
 from vocab.fetcher import WordEntry
-from vocab.game import run_daily_game
+from vocab.game import run_daily_game, score_guess, CORRECT as C, PRESENT as P, ABSENT as A
 
 from rich.console import Console
 
@@ -105,3 +105,16 @@ def test_game_writes_daily_game_row(conn):
 def test_redact_blanks_inflections(word, definition, expected):
     from vocab.display import _redact
     assert _redact(definition, word) == expected
+
+
+@pytest.mark.parametrize("guess,word,expected", [
+    ("nexus", "nexus", [C, C, C, C, C]),
+    ("sunex", "nexus", [P, P, P, P, P]),
+    ("never", "nexus", [C, C, A, A, A]),   # second 'e' absent: the exact match claims the only one
+    ("eerie", "nexus", [A, C, A, A, A]),   # exact match wins over an earlier yellow
+    ("nexuses", "nexus", [C, C, C, C, C, A, A]),  # extra letters already used up
+    ("nex", "nexus", [C, C, C]),
+    ("sexes", "nexus", [A, C, C, A, C]),  # final s is exact, so the first s gets nothing
+])
+def test_score_guess(guess, word, expected):
+    assert [s for _, s in score_guess(guess, word)] == expected
