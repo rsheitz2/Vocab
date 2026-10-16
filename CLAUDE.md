@@ -18,7 +18,7 @@ uv run pytest tests/ -v -m network         # live RSS fetch test
 |--------|---------------|
 | `db.py` | SQLite schema and CRUD (words, daily_games, review_queue) |
 | `fetcher.py` | Fetch M-W RSS, parse WordEntry, seed DB |
-| `game.py` | Daily game loop — 3 tries with progressive hints |
+| `game.py` | Daily game loop — 6 tries with progressive hints |
 | `review.py` | Review session — 1 try per word |
 | `display.py` | All `rich` terminal rendering |
 

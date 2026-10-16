@@ -30,10 +30,18 @@ def _redact(definition: str, word: str) -> str:
     return pattern.sub(repl, definition)
 
 
-def show_blank(word: str, first_letter: bool = False) -> str:
-    if first_letter and word:
-        return word[0].upper() + " " + " ".join("_" * (len(word) - 1))
-    return " ".join("_" * len(word))
+def _reveal_order(word: str) -> list[int]:
+    # First, last, second, then middle letter; always leave at least one letter hidden
+    order = []
+    for i in (0, len(word) - 1, 1, len(word) // 2):
+        if 0 <= i < len(word) and i not in order:
+            order.append(i)
+    return order[: max(len(word) - 1, 0)]
+
+
+def show_blank(word: str, revealed: int = 0) -> str:
+    shown = set(_reveal_order(word)[:revealed])
+    return " ".join(c.upper() if i in shown else "_" for i, c in enumerate(word))
 
 
 def show_puzzle(entry, hint_level: int, console: Console) -> None:
@@ -44,7 +52,7 @@ def show_puzzle(entry, hint_level: int, console: Console) -> None:
         lines.append(Text(f"Part of speech: {entry.part_of_speech}", style="yellow"))
 
     lines.append(Text(""))
-    blank = show_blank(entry.word, first_letter=(hint_level >= 3))
+    blank = show_blank(entry.word, revealed=max(hint_level - 2, 0))
     lines.append(Text(f"Letters: {entry.letter_count}  →  {blank}", style="cyan bold"))
 
     body = Text("\n").join(lines)

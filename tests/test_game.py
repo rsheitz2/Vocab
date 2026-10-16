@@ -43,11 +43,19 @@ def test_correct_on_third_try(conn):
     assert result.tries_used == 3
 
 
+def test_correct_on_sixth_try(conn):
+    inputs = iter(["w1", "w2", "w3", "w4", "w5", "nexus"])
+    with patch("vocab.game.Console.input", side_effect=lambda _: next(inputs)):
+        result = run_daily_game(conn, _entry(), _console())
+    assert result.guessed is True
+    assert result.tries_used == 6
+
+
 def test_exhaust_all_tries(conn):
     with patch("vocab.game.Console.input", return_value="nope"):
         result = run_daily_game(conn, _entry(), _console())
     assert result.guessed is False
-    assert result.tries_used == 3
+    assert result.tries_used == 6
 
 
 def test_case_insensitive_guess(conn):
@@ -60,10 +68,19 @@ def test_blank_display_length():
     assert show_blank("nexus") == "_ _ _ _ _"
 
 
-def test_blank_display_with_first_letter():
-    result = show_blank("nexus", first_letter=True)
-    assert result.startswith("N")
-    assert result.count("_") == 4
+@pytest.mark.parametrize("revealed,expected", [
+    (1, "N _ _ _ _"),
+    (2, "N _ _ _ S"),
+    (3, "N E _ _ S"),
+    (4, "N E X _ S"),
+])
+def test_blank_display_reveals_letters_progressively(revealed, expected):
+    assert show_blank("nexus", revealed=revealed) == expected
+
+
+def test_blank_display_never_reveals_whole_word():
+    assert show_blank("cat", revealed=4).count("_") == 1
+    assert show_blank("go", revealed=4) == "G _"
 
 
 def test_game_writes_daily_game_row(conn):

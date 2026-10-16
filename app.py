@@ -18,11 +18,14 @@ _HELP = """[bold blue]Vocab[/bold blue] — a daily word-guessing game powered b
 [bold]How to play[/bold]
   Each day a new Word of the Day is fetched from Merriam-Webster.
   You are shown the [cyan]definition[/cyan] and the [cyan]number of letters[/cyan].
-  You have [bold]3 tries[/bold] to guess the word, with hints revealed after each wrong guess:
+  You have [bold]6 tries[/bold] to guess the word, with hints revealed after each wrong guess:
 
     Try 1 — definition + blank letters  (e.g. [cyan]_ _ _ _ _[/cyan])
     Try 2 — + part of speech            (e.g. [yellow]noun[/yellow])
     Try 3 — + first letter              (e.g. [cyan]N _ _ _ _[/cyan])
+    Try 4 — + last letter               (e.g. [cyan]N _ _ _ S[/cyan])
+    Try 5 — + second letter             (e.g. [cyan]N E _ _ S[/cyan])
+    Try 6 — + middle letter             (e.g. [cyan]N E X _ S[/cyan])
 
   At any guess prompt: [bold]p[/bold] = hear pronunciation · [bold]e[/bold] = examples, phonetic guide & etymology
 

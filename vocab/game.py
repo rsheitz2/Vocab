@@ -8,6 +8,9 @@ from vocab import audio, db, display, literature
 from vocab.fetcher import WordEntry
 
 
+MAX_TRIES = 6
+
+
 @dataclass
 class GameResult:
     word: str
@@ -16,7 +19,7 @@ class GameResult:
 
 
 def run_daily_game(conn: sqlite3.Connection, entry: WordEntry, console: Console) -> GameResult:
-    for attempt in range(1, 4):
+    for attempt in range(1, MAX_TRIES + 1):
         display.show_puzzle(entry, hint_level=attempt, console=console)
         try:
             while True:
@@ -41,11 +44,11 @@ def run_daily_game(conn: sqlite3.Connection, entry: WordEntry, console: Console)
             db.update_review(conn, entry.word, correct=True)
             return result
 
-        if attempt < 3:
+        if attempt < MAX_TRIES:
             console.print("[red]Not quite — try again.[/red]\n")
 
     display.show_wrong(entry.word, console)
-    result = GameResult(word=entry.word, guessed=False, tries_used=3)
-    db.save_daily_game(conn, date.today(), entry.word, False, 3)
+    result = GameResult(word=entry.word, guessed=False, tries_used=MAX_TRIES)
+    db.save_daily_game(conn, date.today(), entry.word, False, MAX_TRIES)
     db.update_review(conn, entry.word, correct=False)
     return result

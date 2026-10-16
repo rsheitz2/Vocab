@@ -4,13 +4,16 @@ A daily CLI word-guessing game powered by [Merriam-Webster's Word of the Day](ht
 
 ## How to play
 
-Each day you get a new word to guess. You're shown the **definition** and the **number of letters**. You have **3 tries**, and a new hint is revealed after each wrong guess:
+Each day you get a new word to guess. You're shown the **definition** and the **number of letters**. You have **6 tries**, and a new hint is revealed after each wrong guess:
 
 | Try | Hints shown |
 |-----|-------------|
 | 1 | Definition + blanks (e.g. `_ _ _ _ _`) |
 | 2 | + Part of speech (e.g. *noun*) |
 | 3 | + First letter (e.g. `N _ _ _ _`) |
+| 4 | + Last letter (e.g. `N _ _ _ S`) |
+| 5 | + Second letter (e.g. `N E _ _ S`) |
+| 6 | + Middle letter (e.g. `N E X _ S`) |
 
 At any guess prompt you can use these commands instead of guessing — they don't cost a try:
 
@@ -76,7 +79,7 @@ app.py              Entry point / orchestrator
 vocab/
   db.py             SQLite layer (words, daily_games, review_queue)
   fetcher.py        M-W RSS fetch + parse → WordEntry
-  game.py           Daily 3-try game loop
+  game.py           Daily 6-try game loop
   review.py         Spaced-repetition review session
   history.py        Vi-style word history browser
   display.py        All rich terminal rendering
