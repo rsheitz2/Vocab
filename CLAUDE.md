@@ -42,7 +42,7 @@ Words start with `interval_days = 1` (review next day after first encounter).
 
 ## Game mechanics
 
-- Hints by try (`MAX_TRIES = 6` in `game.py`): definition + blanks → part of speech → first letter → last → second → middle. `_reveal_order` always leaves ≥1 letter hidden.
+- Hints by try (`MAX_TRIES = 6` in `game.py`): definition + part of speech + blanks → (no new hint) → first letter → last → second → middle. `_reveal_order` always leaves ≥1 letter hidden.
 - Wrong guesses are shown Wordle-style via `score_guess()` (green/yellow/gray; exact matches claim duplicate letters first).
 - `_redact()` blanks the word *and* inflections (-s/-ed/-ing/…, dropped-e, y→i, doubled consonant); blank is base-word length, suffix stays visible. Irregular forms (ran/run) are not caught.
 - No phonetic pronunciation in clues — it gives the word away. Still available via `e` / `p`.

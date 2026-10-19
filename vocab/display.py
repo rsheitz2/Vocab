@@ -61,13 +61,12 @@ def _render_guess(scored: list[tuple[str, str]]) -> Text:
 
 
 def show_puzzle(entry, hint_level: int, console: Console, guesses: list | None = None) -> None:
-    lines = [Text(_redact(entry.definition, entry.word), style="white")]
-
-    if hint_level >= 2:
-        lines.append(Text(""))
-        lines.append(Text(f"Part of speech: {entry.part_of_speech}", style="yellow"))
-
-    lines.append(Text(""))
+    lines = [
+        Text(_redact(entry.definition, entry.word), style="white"),
+        Text(""),
+        Text(f"Part of speech: {entry.part_of_speech}", style="yellow"),
+        Text(""),
+    ]
     blank = show_blank(entry.word, revealed=max(hint_level - 2, 0))
     lines.append(Text(f"Letters: {entry.letter_count}  →  {blank}", style="cyan bold"))
 
@@ -104,6 +103,7 @@ def show_wrong(word: str, console: Console) -> None:
 def show_review_puzzle(word_row, console: Console) -> None:
     blank = show_blank(word_row["word"])
     body = Text(_redact(word_row["definition"], word_row["word"]) + "\n\n", style="white")
+    body.append(f"Part of speech: {word_row['part_of_speech']}\n\n", style="yellow")
     body.append(f"Letters: {word_row['letter_count']}  →  {blank}", style="cyan bold")
     console.print(Panel(body, title="[bold blue]Review[/bold blue]", border_style="blue"))
 
