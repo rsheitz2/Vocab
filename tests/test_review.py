@@ -69,3 +69,21 @@ def test_no_reviews_due_returns_empty(conn):
     future = date.today() + timedelta(days=5)
     due = get_due_reviews(conn, future - timedelta(days=10))
     assert due == []
+
+
+def test_review_puzzle_shows_redacted_examples():
+    from vocab.display import show_review_puzzle
+    row = {
+        "word": "abscond",
+        "definition": "To depart secretly.",
+        "part_of_speech": "verb",
+        "letter_count": 7,
+        "examples": "Fantasies about absconding from school.\n“Take deposits and abscond to a tropical isle.” — Some Paper, 2025",
+    }
+    console = Console(record=True, width=120, highlight=False)
+    show_review_puzzle(row, console)
+    out = console.export_text()
+    assert "Examples:" in out
+    assert "_______ing from school" in out
+    assert "and _______ to a tropical isle" in out
+    assert "abscond" not in out.lower()

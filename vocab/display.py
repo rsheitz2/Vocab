@@ -105,6 +105,9 @@ def show_review_puzzle(word_row, console: Console) -> None:
     body = Text(_redact(word_row["definition"], word_row["word"]) + "\n\n", style="white")
     body.append(f"Part of speech: {word_row['part_of_speech']}\n\n", style="yellow")
     body.append(f"Letters: {word_row['letter_count']}  →  {blank}", style="cyan bold")
+    examples = _example_lines(_get(word_row, "examples"), redact_word=word_row["word"])
+    if examples:
+        body = Text("\n").join([body, Text(""), *examples])
     console.print(Panel(body, title="[bold blue]Review[/bold blue]", border_style="blue"))
 
 
@@ -139,6 +142,24 @@ _PHONETIC_GUIDE = (
 )
 
 
+def _example_lines(examples_raw: str, redact_word: str | None = None) -> list[Text]:
+    examples = [ex.strip() for ex in (examples_raw or "").split("\n") if ex.strip()]
+    if not examples:
+        return []
+    lines = [Text("Examples:", style="bold yellow")]
+    for ex in examples:
+        if redact_word:
+            ex = _redact(ex, redact_word)
+        if " — " in ex:
+            quote, citation = ex.rsplit(" — ", 1)
+            t = Text(f"  {quote.strip()}", style="white italic")
+            t.append(f"\n  — {citation.strip()}", style="dim")
+            lines.append(t)
+        else:
+            lines.append(Text(f"  • {ex}", style="white"))
+    return lines
+
+
 def show_examples(entry_or_row, literary_examples: list[dict], console: Console, *, rate_limited: bool = False) -> None:
     pronunciation = _get(entry_or_row, "pronunciation")
     examples_raw = _get(entry_or_row, "examples")
@@ -152,18 +173,7 @@ def show_examples(entry_or_row, literary_examples: list[dict], console: Console,
         lines.append(Text(""))
 
     if examples_raw:
-        lines.append(Text("Examples:", style="bold yellow"))
-        for ex in examples_raw.split("\n"):
-            ex = ex.strip()
-            if not ex:
-                continue
-            if " — " in ex:
-                quote, citation = ex.rsplit(" — ", 1)
-                t = Text(f"  {quote.strip()}", style="white italic")
-                t.append(f"\n  — {citation.strip()}", style="dim")
-                lines.append(t)
-            else:
-                lines.append(Text(f"  • {ex}", style="white"))
+        lines.extend(_example_lines(examples_raw))
         lines.append(Text(""))
 
     if literary_examples:
